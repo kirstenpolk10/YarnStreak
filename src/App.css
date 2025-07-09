@@ -1,0 +1,218 @@
+/* Update #root max-width to 400px for your calendar app */
+#root {
+  max-width: 400px;  /* was 1280px */
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* You already have good body styles, keep them as is */
+body {
+  background: #f0f0f0;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+
+/* Add this container class for the main App div */
+.app-container {
+  max-width: 400px;
+  margin: 40px auto;
+  text-align: center;
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Styles for react-calendar to fix colors and layout */
+.react-calendar {
+  background: white !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  color: #333 !important;
+}
+
+.react-calendar__navigation button {
+  color: #333 !important;
+}
+
+.react-calendar__tile {
+  color: #333 !important;
+}
+
+.react-calendar__tile--active {
+  background: #4caf50 !important;
+  color: white !important;
+  border-radius: 50% !important;
+}
+
+.react-calendar__tile:hover {
+  background: #81c784 !important;
+  color: white !important;
+}
+
+.react-calendar__tile--now {
+  background: #e6ffe6 !important;
+  color: #4caf50 !important;
+  border-radius: 50% !important;
+}
+
+/* Your existing .highlight-today stays the same */
+.highlight-today {
+  background: #4caf50 !important;
+  color: white !important;
+  border-radius: 50%;
+}
+.streak-display {
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #4caf50;
+  font-size: 1.5rem;
+}
+
+
+/* Keep your existing logo and animation styles unchanged */
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+.add-project-button {
+  margin-top: 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-project-button:hover {
+  background-color: #43a047;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 300px;
+  width: 90%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-button {
+  display: block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+  width: 100%;
+}
+
+.modal-button:hover {
+  background-color: #43a047;
+}
+
+.close-button {
+  margin-top: 15px;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+}
+.project-input {
+  width: 100%;
+  padding: 10px;
+  margin: 15px 0;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.project-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.project-list li {
+  margin: 0.5rem 0;
+}
+
+.summary-display {
+  margin-top: 20px;
+  font-weight: bold;
+  color: #333;
+}
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #4a90e2; /* blue color */
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin: auto; /* center horizontally */
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
