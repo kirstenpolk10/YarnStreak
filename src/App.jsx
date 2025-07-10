@@ -54,7 +54,7 @@ export default function App() {
       d1.getDate() === d2.getDate()
     );
   }
-  
+
   useEffect(() => {
   calculateGlobalStreak();
 }, []);
@@ -202,27 +202,31 @@ async function calculateGlobalStreak() {
         value={date}
         tileClassName={({ date, view }) => {
           if (view !== "month") return null;
+
           const dateStr = date.toDateString();
-          const isStreak = streakDates.includes(dateStr);
-          const today = isToday(date);
+          const inStreak = streakDates.includes(dateStr);
+          const isTodayDate = isToday(date);
 
-          if (today) return "highlight-today";
-          if (!isStreak) return null;
+          if (!inStreak && !isTodayDate) return null;
 
-          const prevDayStr = new Date(date);
-          prevDayStr.setDate(date.getDate() - 1);
-          const nextDayStr = new Date(date);
-          nextDayStr.setDate(date.getDate() + 1);
+          const prev = new Date(date);
+          prev.setDate(prev.getDate() - 1);
+          const next = new Date(date);
+          next.setDate(next.getDate() + 1);
 
-          const prevInStreak = streakDates.includes(prevDayStr.toDateString());
-          const nextInStreak = streakDates.includes(nextDayStr.toDateString());
+          const hasPrev = streakDates.includes(prev.toDateString());
+          const hasNext = streakDates.includes(next.toDateString());
 
-          if (prevInStreak && nextInStreak) return "streak-middle";
-          if (prevInStreak) return "streak-end";
-          if (nextInStreak) return "streak-start";
+          if (isTodayDate) return "today-highlight";
 
-          return "streak-single";
+          if (hasPrev && hasNext) return "streak-middle";
+          if (!hasPrev && hasNext) return "streak-start";
+          if (hasPrev && !hasNext) return "streak-end";
+          if (!hasPrev && !hasNext) return "streak-single";
+
+          return "streak-day"; // fallback
         }}
+
 
       />
 

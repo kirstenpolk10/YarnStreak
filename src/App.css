@@ -18,7 +18,6 @@ body {
   min-height: 100vh;
 }
 
-
 /* Add this container class for the main App div */
 .app-container {
   max-width: 400px;
@@ -29,7 +28,6 @@ body {
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-
 
 /* Styles for react-calendar to fix colors and layout */
 .react-calendar {
@@ -70,13 +68,13 @@ body {
   color: white !important;
   border-radius: 50%;
 }
+
 .streak-display {
   margin-bottom: 20px;
   font-weight: bold;
   color: #4caf50;
   font-size: 1.5rem;
 }
-
 
 /* Keep your existing logo and animation styles unchanged */
 
@@ -217,77 +215,75 @@ body {
   }
 }
 
-.highlight-today {
-  background: #ffd700 !important;
-  border-radius: 50%;
-  color: #000;
-}
+/* ------------------ STREAK HIGHLIGHT FIX ------------------ */
 
-.highlight-streak {
-  background: #90ee90 !important;
-  border-radius: 50%;
-  color: #000;
-}
-
-/* Highlight current streak day */
-.streak-day {
-  background-color: #ffa726;       /* orange background */
-  border-radius: 999px; /* remove border-radius for straight line effect */
-  color: black;
-  font-weight: bold;
-  padding: 0.2em 0.6em;
-
-
-}
-.streak-start {
-  background-color: #ffa726;
+/* General streak tile styles */
+.streak-start,
+.streak-middle,
+.streak-end,
+.streak-single {
+  background: #ffa500;
   color: white;
+  border-radius: 0;
+  margin: 0 !important;       /* remove gaps */
+  padding: 0.4em 0.6em !important;
+  box-shadow: none !important;
+  box-sizing: border-box;
+}
+
+/* Rounded edges at start and end */
+.streak-start {
   border-top-left-radius: 999px;
   border-bottom-left-radius: 999px;
 }
 
-.streak-middle {
-  background-color: #ffa726;
-  color: white;
-  border-radius: 0;
-}
-
 .streak-end {
-  background-color: #ffa726;
-  color: white;
   border-top-right-radius: 999px;
   border-bottom-right-radius: 999px;
 }
 
+/* Middle streak tiles have no radius, overlap with previous */
+.streak-middle {
+  border-radius: 0;
+  margin-left: -4px; /* overlap streak tiles */
+}
+
+/* Single day streak is a pill shape */
 .streak-single {
-  background-color: #ffa726;
-  color: white;
   border-radius: 999px;
+  margin: 0;
 }
 
-/* Today's Highlight */
-.highlight-today {
-  background-color: #42a5f5 !important;
+/* Today highlight if part of streak, visually streak end */
+/* Blue background with right rounded edges, overlaps previous tile */
+.today-highlight {
+  background: #007bff !important;
   color: white !important;
-  border-radius: 999px;
-  font-weight: bold;
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  margin-left: -4px !important;  /* overlaps previous streak tile */
+  padding: 0.4em 0.6em !important;
 }
 
-/* 📍 Today's Date (not part of streak) */
+/* Override default oval highlight for today when part of streak */
 .react-calendar__tile.highlight-today {
-  background-color: #42a5f5 !important;  /* blue highlight */
+  border-radius: 0 !important;
+  margin-left: -4px !important; /* join with streak tiles */
+  padding: 0.4em 0.6em !important;
+  background-color: #007bff !important;
   color: white !important;
-  border-radius: 999px;
-  font-weight: bold;
 }
 
-/* Optional: round edges of first and last streak days */
-.react-calendar__tile:first-child.streak-day {
-  border-top-left-radius: 50%;
-  border-bottom-left-radius: 50%;
-}
-
-.react-calendar__tile:last-child.streak-day {
-  border-top-right-radius: 50%;
-  border-bottom-right-radius: 50%;
+/* Remove border and margin from all streak tiles to avoid gaps */
+.react-calendar__tile.streak-start,
+.react-calendar__tile.streak-middle,
+.react-calendar__tile.streak-end,
+.react-calendar__tile.streak-single {
+  border: none !important;
+  margin: 0 !important;
+  padding: 0.4em 0.6em !important;
+  box-shadow: none !important;
+  box-sizing: border-box;
 }
