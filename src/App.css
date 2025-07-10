@@ -231,9 +231,53 @@ body {
 
 /* Highlight current streak day */
 .streak-day {
-  background-color: #ffcc00 !important;
-  border-radius: 0; /* remove border-radius for straight line effect */
+  background-color: #ffa726;       /* orange background */
+  border-radius: 999px; /* remove border-radius for straight line effect */
   color: black;
+  font-weight: bold;
+  padding: 0.2em 0.6em;
+
+
+}
+.streak-start {
+  background-color: #ffa726;
+  color: white;
+  border-top-left-radius: 999px;
+  border-bottom-left-radius: 999px;
+}
+
+.streak-middle {
+  background-color: #ffa726;
+  color: white;
+  border-radius: 0;
+}
+
+.streak-end {
+  background-color: #ffa726;
+  color: white;
+  border-top-right-radius: 999px;
+  border-bottom-right-radius: 999px;
+}
+
+.streak-single {
+  background-color: #ffa726;
+  color: white;
+  border-radius: 999px;
+}
+
+/* Today's Highlight */
+.highlight-today {
+  background-color: #42a5f5 !important;
+  color: white !important;
+  border-radius: 999px;
+  font-weight: bold;
+}
+
+/* 📍 Today's Date (not part of streak) */
+.react-calendar__tile.highlight-today {
+  background-color: #42a5f5 !important;  /* blue highlight */
+  color: white !important;
+  border-radius: 999px;
   font-weight: bold;
 }
 

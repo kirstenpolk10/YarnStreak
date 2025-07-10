@@ -190,13 +190,29 @@ async function calculateCurrentStreak(projectId) {
         onChange={setDate}
         value={date}
         tileClassName={({ date, view }) => {
-          if (view === "month") {
-            const dateStr = date.toDateString();
-            if (streakDates.includes(dateStr)) return "streak-day";
-            if (isToday(date)) return "highlight-today";
-          }
-          return null;
+          if (view !== "month") return null;
+          const dateStr = date.toDateString();
+          const isStreak = streakDates.includes(dateStr);
+          const today = isToday(date);
+
+          if (today) return "highlight-today";
+          if (!isStreak) return null;
+
+          const prevDayStr = new Date(date);
+          prevDayStr.setDate(date.getDate() - 1);
+          const nextDayStr = new Date(date);
+          nextDayStr.setDate(date.getDate() + 1);
+
+          const prevInStreak = streakDates.includes(prevDayStr.toDateString());
+          const nextInStreak = streakDates.includes(nextDayStr.toDateString());
+
+          if (prevInStreak && nextInStreak) return "streak-middle";
+          if (prevInStreak) return "streak-end";
+          if (nextInStreak) return "streak-start";
+
+          return "streak-single";
         }}
+
       />
 
 
