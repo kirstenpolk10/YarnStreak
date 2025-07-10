@@ -40,6 +40,8 @@ export default function App() {
   const [timerStartTime, setTimerStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [streakDates, setStreakDates] = useState([]);
+
 
   function startOfDay(date) {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -72,42 +74,46 @@ export default function App() {
   }, []);
 
   async function calculateCurrentStreak(projectId) {
-    try {
-      const logsRef = collection(db, "projects", projectId, "logs");
-      const logsSnapshot = await getDocs(query(logsRef));
+  try {
+    const logsRef = collection(db, "projects", projectId, "logs");
+    const logsSnapshot = await getDocs(query(logsRef));
 
-      const logDates = logsSnapshot.docs
-        .map(doc => {
-          const data = doc.data();
-          return data.timestamp?.toDate();
-        })
-        .filter(Boolean);
+    const logDates = logsSnapshot.docs
+      .map(doc => {
+        const data = doc.data();
+        return data.timestamp?.toDate();
+      })
+      .filter(Boolean);
 
-      // Get unique days only (ignoring time)
-      const uniqueDays = [];
-      logDates.forEach(date => {
-        if (!uniqueDays.some(d => isSameDayJS(d, date))) {
-          uniqueDays.push(startOfDay(date));
-        }
-      });
-
-      // Sort descending (newest first)
-      uniqueDays.sort((a, b) => b - a);
-
-      let streak = 0;
-      let currentDay = startOfDay(new Date());
-
-      while (uniqueDays.some(d => isSameDayJS(d, currentDay))) {
-        streak++;
-        currentDay = new Date(currentDay.getTime() - 24 * 60 * 60 * 1000); // go back 1 day
+    const uniqueDays = [];
+    logDates.forEach(date => {
+      const dayStart = startOfDay(date);
+      if (!uniqueDays.some(d => isSameDayJS(d, dayStart))) {
+        uniqueDays.push(dayStart);
       }
+    });
 
-      setCurrentStreak(streak);
-    } catch (error) {
-      console.error("Error calculating streak:", error);
-      setCurrentStreak(0);
+    uniqueDays.sort((a, b) => b - a);
+
+    let streak = 0;
+    let currentDay = startOfDay(new Date());
+    const streakDays = [];
+
+    while (uniqueDays.some(d => isSameDayJS(d, currentDay))) {
+      streak++;
+      streakDays.push(new Date(currentDay)); // store streak date
+      currentDay = new Date(currentDay.getTime() - 24 * 60 * 60 * 1000);
     }
+
+    setCurrentStreak(streak);
+    setStreakDates(streakDays);
+  } catch (error) {
+    console.error("Error calculating streak:", error);
+    setCurrentStreak(0);
+    setStreakDates([]);
   }
+}
+
 
   async function fetchProjects() {
     setIsLoadingProjects(true);
@@ -154,10 +160,19 @@ export default function App() {
       <Calendar
         onChange={setDate}
         value={date}
-        tileClassName={({ date, view }) =>
-          view === "month" && isToday(date) ? "highlight-today" : null
-        }
-      />
+        tileClassName={({ date, view }) => {
+          if (view !== "month") return null;
+
+          const isTodayDate = isToday(date);
+          const isStreakDay = streakDates.some(d => isSameDayJS(d, date));
+
+          if (isTodayDate) return "highlight-today";
+          if (isStreakDay) return "highlight-streak";
+
+          return null;
+          }}
+        />
+
       {selectedProject && (
         <div className="summary-display">
           <h3>🕒 Total Time Logged: {formatTime(totalSeconds)}</h3>

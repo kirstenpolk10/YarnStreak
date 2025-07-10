@@ -216,3 +216,16 @@ body {
     transform: rotate(360deg);
   }
 }
+
+.highlight-today {
+  background: #ffd700 !important;
+  border-radius: 50%;
+  color: #000;
+}
+
+.highlight-streak {
+  background: #90ee90 !important;
+  border-radius: 50%;
+  color: #000;
+}
+
