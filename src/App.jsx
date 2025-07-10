@@ -73,6 +73,25 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+  const savedProjectId = localStorage.getItem("selectedProjectId");
+  if (savedProjectId) {
+    const fetchAndSet = async () => {
+      const q = query(collection(db, "projects"));
+      const snapshot = await getDocs(q);
+      const found = snapshot.docs.find(doc => doc.id === savedProjectId);
+      if (found) {
+        const project = { id: found.id, ...found.data() };
+        setSelectedProject(project);
+        calculateCurrentStreak(project.id);
+        fetchTotalHours(project.id);
+      }
+    };
+    fetchAndSet();
+  }
+}, []);
+
+
   async function calculateCurrentStreak(projectId) {
   try {
     const logsRef = collection(db, "projects", projectId, "logs");
@@ -278,6 +297,7 @@ export default function App() {
                   className="modal-button"
                   onClick={() => {
                     setSelectedProject(project);
+                    localStorage.setItem("selectedProjectId", project.id);
                     fetchTotalHours(project.id);
                     calculateCurrentStreak(project.id);
 
