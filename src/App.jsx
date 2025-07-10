@@ -54,6 +54,11 @@ export default function App() {
       d1.getDate() === d2.getDate()
     );
   }
+  
+  useEffect(() => {
+  calculateGlobalStreak();
+}, []);
+
 
   useEffect(() => {
     let interval;
@@ -95,7 +100,7 @@ export default function App() {
       const project = { id: projectDoc.id, ...projectDoc.data() };
       setSelectedProject(project);
       localStorage.setItem("selectedProjectId", project.id);
-      calculateCurrentStreak(project.id);
+      calculateGlobalStreak();
       fetchTotalHours(project.id);
     }
   };
@@ -104,43 +109,49 @@ export default function App() {
 }, []);
 
 
-
-async function calculateCurrentStreak(projectId) {
+async function calculateGlobalStreak() {
   try {
-    const logsRef = collection(db, "projects", projectId, "logs");
-    const logsSnapshot = await getDocs(query(logsRef));
+    const projectsSnapshot = await getDocs(collection(db, "projects"));
 
-    const logDates = logsSnapshot.docs
-      .map(doc => doc.data().timestamp?.toDate())
-      .filter(Boolean);
+    const allDates = [];
 
-    const uniqueDays = [];
-    logDates.forEach(date => {
-      const normalized = startOfDay(date);
-      if (!uniqueDays.some(d => isSameDayJS(d, normalized))) {
-        uniqueDays.push(normalized);
-      }
-    });
+    for (const projectDoc of projectsSnapshot.docs) {
+      const logsRef = collection(db, "projects", projectDoc.id, "logs");
+      const logsSnapshot = await getDocs(logsRef);
 
-    uniqueDays.sort((a, b) => b - a);
+      logsSnapshot.forEach((doc) => {
+        const timestamp = doc.data().timestamp?.toDate();
+        if (timestamp) {
+          const normalized = startOfDay(timestamp);
+          if (!allDates.some(d => isSameDayJS(d, normalized))) {
+            allDates.push(normalized);
+          }
+        }
+      });
+    }
+
+    allDates.sort((a, b) => b - a);
+
     let streak = 0;
     let currentDay = startOfDay(new Date());
     const daysInStreak = [];
 
-    while (uniqueDays.some(d => isSameDayJS(d, currentDay))) {
+    while (allDates.some(d => isSameDayJS(d, currentDay))) {
       streak++;
       daysInStreak.push(currentDay);
-      currentDay = new Date(currentDay.getTime() - 24 * 60 * 60 * 1000);
+      currentDay = new Date(currentDay.getTime() - 86400000); // -1 day
     }
 
     setCurrentStreak(streak);
-    setStreakDates(daysInStreak.map(d => d.toDateString())); // store streak days as strings
-  } catch (error) {
-    console.error("Error calculating streak:", error);
+    setStreakDates(daysInStreak.map(d => d.toDateString()));
+
+  } catch (err) {
+    console.error("❌ Error calculating global streak:", err);
     setCurrentStreak(0);
     setStreakDates([]);
   }
 }
+
 
 
 
@@ -323,7 +334,7 @@ async function calculateCurrentStreak(projectId) {
                     setSelectedProject(project);
                     localStorage.setItem("selectedProjectId", project.id);
                     fetchTotalHours(project.id);
-                    calculateCurrentStreak(project.id);
+                    calculateGlobalStreak();
 
                     setShowOpenProjectModal(false);
                     setShowLogTimeModal(true);
@@ -380,7 +391,7 @@ async function calculateCurrentStreak(projectId) {
 
                 setManualTime("");
                 setShowLogTimeModal(false);
-                calculateCurrentStreak(selectedProject.id);
+                calculateGlobalStreak();
                 setSelectedProject(null);
               }}
             >
@@ -443,7 +454,7 @@ async function calculateCurrentStreak(projectId) {
                     setElapsedTime(0);
                     localStorage.removeItem("yarnTimerStart");
                     setShowLogTimeModal(false);
-                    calculateCurrentStreak(selectedProject.id);
+                    calculateGlobalStreak();
                     fetchTotalHours(selectedProject.id);
                     setSelectedProject(null);
                   }}
