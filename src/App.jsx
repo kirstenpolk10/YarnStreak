@@ -75,21 +75,34 @@ export default function App() {
 
   useEffect(() => {
   const savedProjectId = localStorage.getItem("selectedProjectId");
-  if (savedProjectId) {
-    const fetchAndSet = async () => {
-      const q = query(collection(db, "projects"));
-      const snapshot = await getDocs(q);
-      const found = snapshot.docs.find(doc => doc.id === savedProjectId);
-      if (found) {
-        const project = { id: found.id, ...found.data() };
-        setSelectedProject(project);
-        calculateCurrentStreak(project.id);
-        fetchTotalHours(project.id);
-      }
-    };
-    fetchAndSet();
-  }
+
+  const fetchAndSet = async () => {
+    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return;
+
+    let projectDoc;
+    if (savedProjectId) {
+      projectDoc = snapshot.docs.find(doc => doc.id === savedProjectId);
+    }
+
+    // Fallback to first project if saved one isn't found
+    if (!projectDoc) {
+      projectDoc = snapshot.docs[0];
+    }
+
+    if (projectDoc) {
+      const project = { id: projectDoc.id, ...projectDoc.data() };
+      setSelectedProject(project);
+      localStorage.setItem("selectedProjectId", project.id);
+      calculateCurrentStreak(project.id);
+      fetchTotalHours(project.id);
+    }
+  };
+
+  fetchAndSet();
 }, []);
+
 
 
 async function calculateCurrentStreak(projectId) {
