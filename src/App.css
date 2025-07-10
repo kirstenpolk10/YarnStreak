@@ -229,3 +229,21 @@ body {
   color: #000;
 }
 
+/* Highlight current streak day */
+.streak-day {
+  background-color: #ffcc00 !important;
+  border-radius: 0; /* remove border-radius for straight line effect */
+  color: black;
+  font-weight: bold;
+}
+
+/* Optional: round edges of first and last streak days */
+.react-calendar__tile:first-child.streak-day {
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+}
+
+.react-calendar__tile:last-child.streak-day {
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+}

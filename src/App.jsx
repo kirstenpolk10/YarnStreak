@@ -92,46 +92,43 @@ export default function App() {
 }, []);
 
 
-  async function calculateCurrentStreak(projectId) {
+async function calculateCurrentStreak(projectId) {
   try {
     const logsRef = collection(db, "projects", projectId, "logs");
     const logsSnapshot = await getDocs(query(logsRef));
 
     const logDates = logsSnapshot.docs
-      .map(doc => {
-        const data = doc.data();
-        return data.timestamp?.toDate();
-      })
+      .map(doc => doc.data().timestamp?.toDate())
       .filter(Boolean);
 
     const uniqueDays = [];
     logDates.forEach(date => {
-      const dayStart = startOfDay(date);
-      if (!uniqueDays.some(d => isSameDayJS(d, dayStart))) {
-        uniqueDays.push(dayStart);
+      const normalized = startOfDay(date);
+      if (!uniqueDays.some(d => isSameDayJS(d, normalized))) {
+        uniqueDays.push(normalized);
       }
     });
 
     uniqueDays.sort((a, b) => b - a);
-
     let streak = 0;
     let currentDay = startOfDay(new Date());
-    const streakDays = [];
+    const daysInStreak = [];
 
     while (uniqueDays.some(d => isSameDayJS(d, currentDay))) {
       streak++;
-      streakDays.push(new Date(currentDay)); // store streak date
+      daysInStreak.push(currentDay);
       currentDay = new Date(currentDay.getTime() - 24 * 60 * 60 * 1000);
     }
 
     setCurrentStreak(streak);
-    setStreakDates(streakDays);
+    setStreakDates(daysInStreak.map(d => d.toDateString())); // store streak days as strings
   } catch (error) {
     console.error("Error calculating streak:", error);
     setCurrentStreak(0);
     setStreakDates([]);
   }
 }
+
 
 
   async function fetchProjects() {
@@ -180,17 +177,15 @@ export default function App() {
         onChange={setDate}
         value={date}
         tileClassName={({ date, view }) => {
-          if (view !== "month") return null;
-
-          const isTodayDate = isToday(date);
-          const isStreakDay = streakDates.some(d => isSameDayJS(d, date));
-
-          if (isTodayDate) return "highlight-today";
-          if (isStreakDay) return "highlight-streak";
-
+          if (view === "month") {
+            const dateStr = date.toDateString();
+            if (streakDates.includes(dateStr)) return "streak-day";
+            if (isToday(date)) return "highlight-today";
+          }
           return null;
-          }}
-        />
+        }}
+      />
+
 
       {selectedProject && (
         <div className="summary-display">
