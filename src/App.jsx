@@ -142,6 +142,9 @@ export default function App() {
 
     allDates.sort((a, b) => b - a);
 
+    // Set streakDates for calendar highlighting
+    setStreakDates(allDates.map(d => d.toDateString()));
+
     let streak = 0;
     let currentDay = startOfDay(new Date());
 
@@ -158,6 +161,7 @@ export default function App() {
     setIsStreakLoading(false);
   }
 }
+
 
   async function fetchProjects() {
     setIsLoadingProjects(true);
