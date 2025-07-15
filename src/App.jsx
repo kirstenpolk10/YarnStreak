@@ -65,6 +65,8 @@ export default function App() {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [streakDates, setStreakDates] = useState([]);
+  const [isStreakLoading, setIsStreakLoading] = useState(false);
+
 
   useEffect(() => {
     calculateGlobalStreak();
@@ -118,39 +120,44 @@ export default function App() {
   }, []);
 
   async function calculateGlobalStreak() {
-    try {
-      const projectsSnapshot = await getDocs(collection(db, "projects"));
-      const allDates = [];
-      for (const projectDoc of projectsSnapshot.docs) {
-        const logsRef = collection(db, "projects", projectDoc.id, "logs");
-        const logsSnapshot = await getDocs(logsRef);
-        logsSnapshot.forEach((doc) => {
-          const timestamp = doc.data().timestamp?.toDate();
-          if (timestamp) {
-            const normalized = startOfDay(timestamp);
-            if (!allDates.some((d) => isSameDayJS(d, normalized))) {
-              allDates.push(normalized);
-            }
+  setIsStreakLoading(true);
+  try {
+    const projectsSnapshot = await getDocs(collection(db, "projects"));
+    const allDates = [];
+
+    for (const projectDoc of projectsSnapshot.docs) {
+      const logsRef = collection(db, "projects", projectDoc.id, "logs");
+      const logsSnapshot = await getDocs(logsRef);
+
+      logsSnapshot.forEach((doc) => {
+        const timestamp = doc.data().timestamp?.toDate();
+        if (timestamp) {
+          const normalized = startOfDay(timestamp);
+          if (!allDates.some((d) => isSameDayJS(d, normalized))) {
+            allDates.push(normalized);
           }
-        });
-      }
-      allDates.sort((a, b) => b - a);
-      let streak = 0;
-      let currentDay = startOfDay(new Date());
-      const daysInStreak = [];
-      while (allDates.some((d) => isSameDayJS(d, currentDay))) {
-        streak++;
-        daysInStreak.push(currentDay);
-        currentDay = new Date(currentDay.getTime() - 86400000);
-      }
-      setCurrentStreak(streak);
-      setStreakDates(daysInStreak.map((d) => d.toDateString()));
-    } catch (err) {
-      console.error("❌ Error calculating global streak:", err);
-      setCurrentStreak(0);
-      setStreakDates([]);
+        }
+      });
     }
+
+    allDates.sort((a, b) => b - a);
+
+    let streak = 0;
+    let currentDay = startOfDay(new Date());
+
+    while (allDates.some((d) => isSameDayJS(d, currentDay))) {
+      streak++;
+      currentDay = new Date(currentDay.getTime() - 86400000);
+    }
+
+    setCurrentStreak(streak);
+  } catch (error) {
+    console.error("Error calculating streak:", error);
+    setCurrentStreak(0);
+  } finally {
+    setIsStreakLoading(false);
   }
+}
 
   async function fetchProjects() {
     setIsLoadingProjects(true);
@@ -189,7 +196,11 @@ export default function App() {
     <div className="app-container">
       <h1>Yarn Streak</h1>
       <div className="streak-display">
-        <h2>🔥 Current Streak: {currentStreak} days</h2>
+        {isStreakLoading ? (
+         <p>Loading streak...</p>
+        ) : (
+           <h2>🔥 Current Streak: {currentStreak} days</h2>
+         )}
       </div>
 
       <Calendar
