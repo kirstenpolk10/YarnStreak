@@ -256,6 +256,7 @@ body {
 
 /* Today highlight if part of streak, visually streak end */
 /* Blue background with right rounded edges, overlaps previous tile */
+/* Today in Streak */
 .today-highlight {
   background: #007bff !important;
   color: white !important;
@@ -263,9 +264,10 @@ body {
   border-bottom-right-radius: 999px !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
-  margin-left: -4px !important;  /* overlaps previous streak tile */
+  margin-left: -4px !important;
   padding: 0.4em 0.6em !important;
 }
+
 
 /* Override default oval highlight for today when part of streak */
 .react-calendar__tile.highlight-today {
@@ -286,4 +288,17 @@ body {
   padding: 0.4em 0.6em !important;
   box-shadow: none !important;
   box-sizing: border-box;
+}
+
+/* Standalone Today - Oval Shape */
+.react-calendar__tile--now:not(.streak-middle):not(.streak-start):not(.streak-end):not(.streak-single) {
+  background-color: #007bff !important;  /* or #ff9800 if you prefer orange */
+  color: white !important;
+  border-radius: 20px !important;         /* oval shape */
+  width: 40px;                            /* adjust size */
+  height: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
 }
