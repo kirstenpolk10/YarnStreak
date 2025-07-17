@@ -66,6 +66,12 @@ export default function App() {
   const [isPaused, setIsPaused] = useState(false);
   const [streakDates, setStreakDates] = useState([]);
   const [isStreakLoading, setIsStreakLoading] = useState(false);
+  const [projectManuallySelected, setProjectManuallySelected] = useState(false);
+  const [logDate, setLogDate] = useState(new Date());
+  const [lastLoggedTime, setLastLoggedTime] = useState(null);
+
+
+
 
 
   useEffect(() => {
@@ -162,6 +168,20 @@ export default function App() {
   }
 }
 
+const fetchLastLog = async (projectId) => {
+  const logsRef = collection(db, "projects", projectId, "logs");
+  const logsSnapshot = await getDocs(query(logsRef, orderBy("timestamp", "desc")));
+  if (!logsSnapshot.empty) {
+    const latest = logsSnapshot.docs[0].data();
+    setLastLoggedTime({
+      hours: latest.hours,
+      timestamp: latest.timestamp?.toDate(),
+    });
+  } else {
+    setLastLoggedTime(null);
+  }
+};
+
 
   async function fetchProjects() {
     setIsLoadingProjects(true);
@@ -186,9 +206,10 @@ export default function App() {
       let totalSecs = 0;
       logsSnapshot.forEach((doc) => {
         const data = doc.data();
-        if (data.hours) {
-          totalSecs += parseFloat(data.hours) * 3600;
+        if (data.minutes) {
+          totalSecs += parseInt(data.minutes) * 60;
         }
+
       });
       setTotalSeconds(totalSecs);
     } catch (error) {
@@ -212,26 +233,46 @@ export default function App() {
         value={date}
         tileClassName={({ date, view }) => {
           if (view !== "month") return null;
-          const dateStr = date.toDateString();
+
+          const dateStr = startOfDay(date).toDateString();
           const inStreak = streakDates.includes(dateStr);
           const isTodayDate = isToday(date);
+
           if (!inStreak && !isTodayDate) return null;
-          const prev = new Date(date);
-          prev.setDate(prev.getDate() - 1);
-          const next = new Date(date);
-          next.setDate(next.getDate() + 1);
+
+          const prev = startOfDay(new Date(date.getTime() - 86400000));
+          const next = startOfDay(new Date(date.getTime() + 86400000));
+
           const hasPrev = streakDates.includes(prev.toDateString());
           const hasNext = streakDates.includes(next.toDateString());
+
+          console.log({
+            dateStr,
+            hasPrev,
+            hasNext,
+            class: 
+              isTodayDate ? "today-highlight" : 
+              hasPrev && hasNext ? "streak-middle" : 
+              !hasPrev && hasNext ? "streak-start" : 
+              hasPrev && !hasNext ? "streak-end" : 
+              !hasPrev && !hasNext ? "streak-single" : null
+          });
+
           if (isTodayDate) return "today-highlight";
           if (hasPrev && hasNext) return "streak-middle";
           if (!hasPrev && hasNext) return "streak-start";
           if (hasPrev && !hasNext) return "streak-end";
           if (!hasPrev && !hasNext) return "streak-single";
-          return "streak-day";
+
+          return null;
         }}
+
+
+
+
       />
 
-      {selectedProject && (
+      {selectedProject && projectManuallySelected && (
         <div className="summary-display">
           <h3>🕒 Total Time Logged: {formatTime(totalSeconds)}</h3>
         </div>
@@ -336,14 +377,19 @@ export default function App() {
                 <button
                   key={project.id}
                   className="modal-button"
-                  onClick={() => {
+                 onClick={() => {
                     setSelectedProject(project);
+                    setLogDate(new Date());
                     localStorage.setItem("selectedProjectId", project.id);
                     fetchTotalHours(project.id);
                     calculateGlobalStreak();
                     setShowOpenProjectModal(false);
                     setShowLogTimeModal(true);
+                    setProjectManuallySelected(true);  // ✅ Mark as manually selected
+              
+
                   }}
+
                 >
                   {project.name}
                 </button>
@@ -371,13 +417,20 @@ export default function App() {
 
             <input
               type="number"
-              placeholder="Hours worked (e.g. 2.5)"
+              placeholder="Minutes worked (e.g. 45)"
               value={manualTime}
               onChange={(e) => setManualTime(e.target.value)}
               min="0"
-              step="0.1"
+              step="1"
               className="project-input"
             />
+
+            <p>Select Log Date:</p>
+            <Calendar
+              onChange={setLogDate}
+              value={logDate}
+            />
+
 
             <button
               className="modal-button"
@@ -389,10 +442,17 @@ export default function App() {
                   await addDoc(
                     collection(db, "projects", selectedProject.id, "logs"),
                     {
-                      hours: parseFloat(manualTime),
-                      timestamp: serverTimestamp(),
+                      minutes: parseInt(manualTime),
+                      timestamp: new Date(
+                      logDate.getFullYear(),
+                      logDate.getMonth(),
+                      logDate.getDate(),
+                      12, 0, 0
+                    ),
+
                     }
                   );
+                  fetchTotalHours(selectedProject.id);
                   console.log("✅ Time logged successfully");
                 } catch (error) {
                   console.error("❌ Error logging time:", error);
@@ -454,8 +514,14 @@ export default function App() {
                       await addDoc(
                         collection(db, "projects", selectedProject.id, "logs"),
                         {
-                          hours: parseFloat(hours.toFixed(4)),
-                          timestamp: serverTimestamp(),
+                          minutes: Math.round(elapsedTime / 60),
+                          timestamp: new Date(
+                            logDate.getFullYear(),
+                            logDate.getMonth(),
+                            logDate.getDate(),
+                            12, 0, 0
+                          ),
+
                         }
                       );
                       alert(`⏹️ Timer stopped. Logged ${hours.toFixed(4)} hrs`);
